@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en" data-theme="dark" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <script>
+      (function () {
+        try {
+          var key = 'astra-theme'
+          var stored = localStorage.getItem(key)
+          var theme =
+            stored === 'light' || stored === 'dark'
+              ? stored
+              : window.matchMedia('(prefers-color-scheme: light)').matches
+                ? 'light'
+                : 'dark'
+          document.documentElement.dataset.theme = theme
+          document.documentElement.classList.toggle('light', theme === 'light')
+          document.documentElement.classList.toggle('dark', theme === 'dark')
+          document.documentElement.style.colorScheme = theme
+        } catch (e) {
+          document.documentElement.dataset.theme = 'dark'
+          document.documentElement.classList.add('dark')
+        }
+      })()
+    </script>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="ASTRA is the personal portfolio of Pawan Kumar G., a CSE student and developer exploring full-stack engineering, open source, and AI/ML. Per Aspera Ad Astra."
+    />
+    <meta name="theme-color" content="#070B16" />
+    <meta name="color-scheme" content="dark light" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="ASTRA — Pawan Kumar G." />
+    <meta
+      property="og:description"
+      content="A personal universe of missions, constellations, and unexplored horizons. Per Aspera Ad Astra."
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="ASTRA — Pawan Kumar G." />
+    <meta
+      name="twitter:description"
+      content="A personal universe of missions, constellations, and unexplored horizons. Per Aspera Ad Astra."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <title>ASTRA — Pawan Kumar G.</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
