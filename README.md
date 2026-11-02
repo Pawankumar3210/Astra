@@ -78,6 +78,3 @@ These values are left empty on purpose and will not appear as public links until
 - Production `siteUrl` (canonical / Open Graph URL)
 - Optional project `screenshot` paths
 
-LinkedIn is taken from the Wisdom Vault project README. Confirm it before sharing widely.
-
-PuzzleFlow is intentionally not listed.
