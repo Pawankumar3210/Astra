@@ -1,48 +1,61 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { ArrowDown } from 'lucide-react'
 import { portfolio } from '@/content/portfolio'
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
 import { EarthHorizon } from './EarthHorizon'
 
-export function CosmicHero() {
-  const reduced = usePrefersReducedMotion()
-  const glowRef = useRef<HTMLDivElement>(null)
-  const earthRef = useRef<HTMLDivElement>(null)
+function TypewriterMotto({ reduced }: { reduced: boolean }) {
+  const full = portfolio.motto
+  const firstLine = portfolio.mottoLines[0]
+  const [visible, setVisible] = useState(0)
 
   useEffect(() => {
     if (reduced) return
-    const glow = glowRef.current
-    const earth = earthRef.current
-    if (!glow) return
-    let raf = 0
-    const pos = { x: window.innerWidth * 0.72, y: window.innerHeight * 0.42 }
-    const target = { ...pos }
 
-    const onMove = (event: PointerEvent) => {
-      target.x = event.clientX
-      target.y = event.clientY
-    }
+    let index = 0
+    let timer = 0
 
     const tick = () => {
-      pos.x += (target.x - pos.x) * 0.08
-      pos.y += (target.y - pos.y) * 0.08
-      glow.style.transform = `translate(${pos.x}px, ${pos.y}px)`
-      if (earth) {
-        const px = (pos.x / window.innerWidth - 0.5) * 14
-        const py = (pos.y / window.innerHeight - 0.5) * 8
-        earth.style.transform = `translate(${px}px, ${py}px)`
+      index += 1
+      setVisible(index)
+      if (index < full.length) {
+        const char = full[index - 1]
+        const delay = char === ' ' ? 140 : index === firstLine.length + 1 ? 320 : 54 + (index % 4) * 8
+        timer = window.setTimeout(tick, delay)
       }
-      raf = window.requestAnimationFrame(tick)
     }
 
-    window.addEventListener('pointermove', onMove, { passive: true })
-    raf = window.requestAnimationFrame(tick)
-    return () => {
-      window.removeEventListener('pointermove', onMove)
-      window.cancelAnimationFrame(raf)
-    }
-  }, [reduced])
+    timer = window.setTimeout(tick, 320)
+    return () => window.clearTimeout(timer)
+  }, [firstLine.length, full, reduced])
+
+  const shown = reduced ? full.length : visible
+  const firstVisible = full.slice(0, Math.min(shown, firstLine.length))
+  const secondVisible = shown > firstLine.length ? full.slice(firstLine.length + 1, shown) : ''
+  const typingFirst = shown < firstLine.length
+  const done = shown >= full.length
+  const caret = !reduced && !done ? <span className="typewriter-caret" aria-hidden="true" /> : null
+
+  return (
+    <span className="block">
+      <span className="sr-only">{full}</span>
+      <span aria-hidden="true">
+        <span className="block">
+          {firstVisible}
+          {typingFirst ? caret : null}
+        </span>
+        <span className="block text-[var(--accent)]">
+          {secondVisible}
+          {!typingFirst && !done ? caret : null}
+        </span>
+      </span>
+    </span>
+  )
+}
+
+export function CosmicHero() {
+  const reduced = usePrefersReducedMotion()
 
   const fade = reduced
     ? undefined
@@ -57,11 +70,9 @@ export function CosmicHero() {
       className="relative isolate min-h-[100svh] overflow-hidden"
       aria-labelledby="hero-heading"
     >
-      <div ref={glowRef} className="pointer-glow hidden md:block" aria-hidden="true" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_70%_88%,color-mix(in_srgb,var(--atmosphere)_26%,transparent),transparent_58%)]" />
-      <div ref={earthRef}>
-        <EarthHorizon />
-      </div>
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_70%_88%,color-mix(in_srgb,var(--atmosphere)_18%,transparent),transparent_58%)]" />
+      <EarthHorizon />
+      <div className="hero-veil" aria-hidden="true" />
 
       <div className="section-shell relative z-10 flex min-h-[100svh] flex-col justify-center pt-20 pb-36">
         <motion.div
@@ -72,13 +83,8 @@ export function CosmicHero() {
             show: { transition: { staggerChildren: reduced ? 0 : 0.12 } },
           }}
         >
-          <motion.p className="kicker" variants={fade}>
-            {portfolio.owner.introLabel}
-          </motion.p>
-          <motion.h1 id="hero-heading" className="heading-xl mt-6" variants={fade}>
-            {portfolio.mottoLines[0]}
-            <br />
-            <span className="text-[var(--accent)]">{portfolio.mottoLines[1]}</span>
+          <motion.h1 id="hero-heading" className="heading-xl hero-motto" variants={fade}>
+            <TypewriterMotto reduced={reduced} />
           </motion.h1>
           <motion.p className="mt-8 font-display text-2xl text-[var(--text)] sm:text-3xl" variants={fade}>
             {portfolio.owner.greeting}

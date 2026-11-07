@@ -6,8 +6,19 @@ type Star = {
   y: number
   r: number
   o: number
-  s: number
-  p: number
+  depth: number
+  phase: number
+  speed: number
+  tint: 'white' | 'cyan' | 'violet'
+  glint: boolean
+}
+
+function seededRandom(seed: number) {
+  let state = seed >>> 0
+  return () => {
+    state = (state * 1664525 + 1013904223) >>> 0
+    return state / 4294967296
+  }
 }
 
 export function Starfield() {
@@ -24,18 +35,27 @@ export function Starfield() {
     let width = 0
     let height = 0
     let stars: Star[] = []
+    let warpStartedAt = 0
+    let smoothedScroll = window.scrollY
     const pointer = { x: 0.5, y: 0.5 }
     const prefersReduced = reduced
 
     const seed = (count: number) => {
-      stars = Array.from({ length: count }, (_, index) => ({
-        x: (index * 97) % 1000 / 1000,
-        y: (index * 53) % 1000 / 1000,
-        r: 0.4 + (index % 5) * 0.22,
-        o: 0.18 + (index % 7) * 0.08,
-        s: 0.4 + (index % 4) * 0.12,
-        p: 0.2 + (index % 6) * 0.08,
-      }))
+      const random = seededRandom(2731)
+      stars = Array.from({ length: count }, () => {
+        const tintRoll = random()
+        return {
+          x: random(),
+          y: random(),
+          r: 0.32 + random() * 1.05,
+          o: 0.2 + random() * 0.58,
+          depth: 0.35 + random() * 1.15,
+          phase: random() * Math.PI * 2,
+          speed: 0.55 + random() * 0.85,
+          tint: tintRoll > 0.9 ? 'cyan' : tintRoll > 0.82 ? 'violet' : 'white',
+          glint: random() > 0.86,
+        }
+      })
     }
 
     const resize = () => {
@@ -47,29 +67,76 @@ export function Starfield() {
       canvas.style.width = `${width}px`
       canvas.style.height = `${height}px`
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
-      seed(width < 720 ? 70 : 110)
+      seed(width < 720 ? 82 : 132)
+      if (prefersReduced) draw(0)
     }
 
     const draw = (time: number) => {
       ctx.clearRect(0, 0, width, height)
-      const driftX = (pointer.x - 0.5) * 18
-      const driftY = (pointer.y - 0.5) * 12
-      for (const star of stars) {
-        const twinkle = prefersReduced ? 1 : 0.65 + Math.sin(time * 0.001 * star.s + star.p * 12) * 0.35
-        ctx.beginPath()
-        const light = document.documentElement.dataset.theme === 'light'
-        ctx.fillStyle = light
-          ? `rgba(11, 18, 32, ${star.o * twinkle * 0.55})`
-          : `rgba(242, 245, 252, ${star.o * twinkle})`
-        ctx.arc(
-          star.x * width + driftX * star.p,
-          star.y * height + driftY * star.p,
-          star.r,
-          0,
-          Math.PI * 2,
-        )
-        ctx.fill()
+      const light = document.documentElement.dataset.theme === 'light'
+      const pointerX = (pointer.x - 0.5) * 7
+      const pointerY = (pointer.y - 0.5) * 5
+      const warpElapsed = warpStartedAt ? (time - warpStartedAt) / 1900 : 1
+      const warpPulse =
+        warpStartedAt && warpElapsed < 1
+          ? Math.sin(Math.PI * Math.max(0, warpElapsed))
+          : 0
+
+      if (!prefersReduced) {
+        smoothedScroll += (window.scrollY - smoothedScroll) * 0.045
+      } else {
+        smoothedScroll = window.scrollY
       }
+
+      const travel = -smoothedScroll * 0.055
+      const wrapHeight = height + 64
+
+      for (const star of stars) {
+        const twinkle = prefersReduced
+          ? 0.86
+          : 0.68 + Math.sin(time * 0.001 * star.speed + star.phase) * 0.32
+        const float = prefersReduced
+          ? 0
+          : Math.sin(time * 0.00023 + star.phase) * (2.2 + star.depth * 2.8)
+        const baseY = star.y * wrapHeight + travel * star.depth + float + pointerY * star.depth
+        const y = ((baseY % wrapHeight) + wrapHeight) % wrapHeight - 32
+        const x =
+          star.x * width +
+          pointerX * star.depth +
+          (prefersReduced ? 0 : Math.sin(time * 0.00011 + star.phase) * 2)
+
+        const colorBase =
+          star.tint === 'cyan'
+            ? '139, 229, 255'
+            : star.tint === 'violet'
+              ? '184, 173, 255'
+              : light
+                ? '11, 18, 32'
+                : '246, 249, 255'
+        const alpha = Math.min(
+          0.95,
+          star.o * twinkle * (light ? 0.34 : 1) * (1 + warpPulse * 0.6),
+        )
+        const radius = star.r * (1 + warpPulse * 0.55)
+
+        ctx.beginPath()
+        ctx.fillStyle = `rgba(${colorBase}, ${alpha})`
+        ctx.arc(x, y, radius, 0, Math.PI * 2)
+        ctx.fill()
+
+        if (!light && star.glint && radius > 0.85) {
+          const glintLength = radius * (3.2 + warpPulse * 2)
+          ctx.beginPath()
+          ctx.strokeStyle = `rgba(${colorBase}, ${alpha * 0.28})`
+          ctx.lineWidth = 0.55
+          ctx.moveTo(x - glintLength, y)
+          ctx.lineTo(x + glintLength, y)
+          ctx.moveTo(x, y - glintLength)
+          ctx.lineTo(x, y + glintLength)
+          ctx.stroke()
+        }
+      }
+
       if (!prefersReduced) {
         frame = window.requestAnimationFrame(draw)
       }
@@ -78,6 +145,10 @@ export function Starfield() {
     const onMove = (event: PointerEvent) => {
       pointer.x = event.clientX / width
       pointer.y = event.clientY / height
+    }
+
+    const onWarp = () => {
+      warpStartedAt = performance.now()
     }
 
     const themeObserver = new MutationObserver(() => {
@@ -92,11 +163,13 @@ export function Starfield() {
     draw(0)
     window.addEventListener('resize', resize)
     window.addEventListener('pointermove', onMove, { passive: true })
+    window.addEventListener('astra:warp', onWarp)
 
     return () => {
       window.cancelAnimationFrame(frame)
       window.removeEventListener('resize', resize)
       window.removeEventListener('pointermove', onMove)
+      window.removeEventListener('astra:warp', onWarp)
       themeObserver.disconnect()
     }
   }, [reduced])
@@ -104,7 +177,7 @@ export function Starfield() {
   return (
     <canvas
       ref={canvasRef}
-      className="pointer-events-none fixed inset-0 z-0 opacity-80"
+      className="pointer-events-none fixed inset-0 z-0 opacity-90"
       aria-hidden="true"
     />
   )

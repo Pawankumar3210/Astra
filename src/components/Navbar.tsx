@@ -1,17 +1,22 @@
-import { useEffect, useId, useRef, useState } from 'react'
-import { Menu, X } from 'lucide-react'
+import { useEffect, useId, useMemo, useRef, useState } from 'react'
+import { Menu, Search, X } from 'lucide-react'
 import { portfolio } from '@/content/portfolio'
 import { useActiveSection } from '@/hooks/useActiveSection'
+import { useBodyScrollLock } from '@/hooks/useBodyScrollLock'
 import { cn } from '@/lib/cn'
 import { ThemeToggle } from './ThemeToggle'
 
-export function Navbar() {
+type NavbarProps = {
+  onOpenPalette: () => void
+}
+
+export function Navbar({ onOpenPalette }: NavbarProps) {
   const [scrolled, setScrolled] = useState(false)
   const [open, setOpen] = useState(false)
   const menuId = useId()
   const panelRef = useRef<HTMLDivElement>(null)
   const buttonRef = useRef<HTMLButtonElement>(null)
-  const ids = portfolio.nav.map((item) => item.id)
+  const ids = useMemo(() => portfolio.nav.map((item) => item.id), [])
   const active = useActiveSection(ids)
 
   useEffect(() => {
@@ -45,12 +50,7 @@ export function Navbar() {
     }
   }, [open])
 
-  useEffect(() => {
-    document.body.style.overflow = open ? 'hidden' : ''
-    return () => {
-      document.body.style.overflow = ''
-    }
-  }, [open])
+  useBodyScrollLock(open)
 
   return (
     <header
@@ -61,32 +61,37 @@ export function Navbar() {
           : 'border-b border-transparent bg-transparent',
       )}
     >
-      <div className="mx-auto flex h-[var(--header-h)] w-[min(1180px,calc(100%-1.5rem))] items-center justify-between gap-4">
-        <a href="#home" className="font-display text-lg tracking-[0.28em] text-[var(--text)]">
-          ASTRA
-        </a>
-
-        <nav className="hidden items-center gap-6 lg:flex" aria-label="Primary">
+      <div className="mx-auto flex h-[var(--header-h)] w-[min(1180px,calc(100%-1.5rem))] items-center gap-4">
+        <div className="hidden flex-1 lg:block" aria-hidden="true" />
+        <nav className="hidden items-center gap-1.5 lg:flex xl:gap-2" aria-label="Primary">
           {portfolio.nav.map((item) => (
             <a
               key={item.id}
               href={item.href}
-              className="relative font-mono text-[0.68rem] uppercase tracking-[0.18em] text-[var(--text-soft)] transition-colors hover:text-[var(--text)]"
+              className={cn('nav-link', active === item.id && 'nav-link--active')}
               aria-current={active === item.id ? 'location' : undefined}
             >
               {item.label}
-              {active === item.id ? <span className="nav-indicator" aria-hidden="true" /> : null}
             </a>
           ))}
         </nav>
 
-        <div className="flex items-center gap-2">
-          <a
-            href="#contact"
-            className="btn btn-ghost hidden !min-h-9 !px-3 !text-sm sm:inline-flex"
+        <div className="ml-auto flex flex-1 items-center justify-end gap-2">
+          <span className="hidden sm:block">
+            <a href="#contact" className="btn btn-ghost !min-h-9 !px-3 !text-sm">
+              Collaborate
+            </a>
+          </span>
+          <button
+            type="button"
+            className="command-trigger grid h-10 w-10 place-items-center rounded-full border border-[var(--border)] text-[var(--text-soft)] transition-colors hover:border-[var(--accent)] hover:text-[var(--accent)]"
+            onClick={onOpenPalette}
+            aria-label="Open command palette"
+            aria-keyshortcuts="Control+K Meta+K"
+            title={`Command palette (${portfolio.paletteShortcut})`}
           >
-            Collaborate
-          </a>
+            <Search size={17} aria-hidden="true" />
+          </button>
           <ThemeToggle />
           <button
             ref={buttonRef}
@@ -106,7 +111,7 @@ export function Navbar() {
         <div
           ref={panelRef}
           id={menuId}
-          className="glass mx-3 mb-3 rounded-2xl p-4 lg:hidden"
+          className="mobile-menu glass mx-3 mb-3 max-h-[calc(100svh-var(--header-h)-1.5rem)] overflow-y-auto rounded-2xl p-4 lg:hidden"
         >
           <nav className="grid gap-1" aria-label="Mobile">
             {portfolio.nav.map((item) => (

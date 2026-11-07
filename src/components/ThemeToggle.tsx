@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion'
 import { Moon, Sun } from 'lucide-react'
-import { useTheme } from '@/context/ThemeContext'
+import { useTheme } from '@/context/theme'
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
 
 export function ThemeToggle() {

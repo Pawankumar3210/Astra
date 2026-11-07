@@ -1,4 +1,5 @@
 import { cn } from '@/lib/cn'
+import { Reveal } from './Reveal'
 
 type SectionHeadingProps = {
   kicker: string
@@ -16,7 +17,7 @@ export function SectionHeading({
   id,
 }: SectionHeadingProps) {
   return (
-    <div className={cn('max-w-2xl', align === 'center' && 'mx-auto text-center')}>
+    <Reveal className={cn('max-w-2xl', align === 'center' && 'mx-auto text-center')}>
       <p className={cn('kicker', align === 'center' && 'justify-center')}>{kicker}</p>
       <h2 id={id} className="heading-lg mt-4 text-[var(--text)]">{title}</h2>
       {description ? (
@@ -24,6 +25,6 @@ export function SectionHeading({
           {description}
         </p>
       ) : null}
-    </div>
+    </Reveal>
   )
 }

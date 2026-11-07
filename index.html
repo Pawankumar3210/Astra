@@ -17,6 +17,10 @@
           document.documentElement.classList.toggle('light', theme === 'light')
           document.documentElement.classList.toggle('dark', theme === 'dark')
           document.documentElement.style.colorScheme = theme
+          var meta = document.querySelector('meta[name="theme-color"]')
+          if (meta) {
+            meta.setAttribute('content', theme === 'light' ? '#E8E9E5' : '#070B16')
+          }
         } catch (e) {
           document.documentElement.dataset.theme = 'dark'
           document.documentElement.classList.add('dark')
@@ -24,25 +28,45 @@
       })()
     </script>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="apple-touch-icon" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="author" content="Pawan Kumar G." />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://pawankumarg.vercel.app/" />
     <meta
       name="description"
-      content="ASTRA is the personal portfolio of Pawan Kumar G., a CSE student and developer exploring full-stack engineering, open source, and AI/ML. Per Aspera Ad Astra."
+      content="Pawan Kumar G. is a CSE student and developer building full-stack products, contributing to open source, and exploring AI/ML. Explore projects, engineering work, and ways to collaborate."
     />
+    <meta name="application-name" content="Pawan Kumar G" />
     <meta name="theme-color" content="#070B16" />
     <meta name="color-scheme" content="dark light" />
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="ASTRA — Pawan Kumar G." />
+    <meta property="og:site_name" content="Pawan Kumar G" />
+    <meta property="og:url" content="https://pawankumarg.vercel.app/" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:title" content="Pawan Kumar G" />
     <meta
       property="og:description"
-      content="A personal universe of missions, constellations, and unexplored horizons. Per Aspera Ad Astra."
+      content="Projects, open-source work, and engineering notes from Pawan Kumar G., a CSE student building full-stack products and exploring AI/ML."
+    />
+    <meta property="og:image" content="https://pawankumarg.vercel.app/og-image.jpg?v=2" />
+    <meta property="og:image:type" content="image/jpeg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content="Pawan Kumar G. portfolio hero with the motto Per Aspera Ad Astra above an Earth horizon."
     />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="ASTRA — Pawan Kumar G." />
+    <meta name="twitter:title" content="Pawan Kumar G" />
     <meta
       name="twitter:description"
-      content="A personal universe of missions, constellations, and unexplored horizons. Per Aspera Ad Astra."
+      content="Projects, open-source work, and engineering notes from Pawan Kumar G., a CSE student building full-stack products and exploring AI/ML."
+    />
+    <meta name="twitter:image" content="https://pawankumarg.vercel.app/og-image.jpg?v=2" />
+    <meta
+      name="twitter:image:alt"
+      content="Pawan Kumar G. portfolio hero with the motto Per Aspera Ad Astra above an Earth horizon."
     />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -50,7 +74,35 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
-    <title>ASTRA — Pawan Kumar G.</title>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "ProfilePage",
+        "url": "https://pawankumarg.vercel.app/",
+        "inLanguage": "en",
+        "mainEntity": {
+          "@type": "Person",
+          "name": "Pawan Kumar G.",
+          "alternateName": "Pawan Kumar G",
+          "url": "https://pawankumarg.vercel.app/",
+          "image": "https://pawankumarg.vercel.app/og-image.jpg",
+          "jobTitle": "CSE Student and Developer",
+          "description": "CSE student and developer building full-stack products, contributing to open source, and exploring AI/ML.",
+          "sameAs": [
+            "https://github.com/Pawankumar3210",
+            "https://www.linkedin.com/in/pawan-kumar-g/"
+          ],
+          "knowsAbout": [
+            "Full-stack development",
+            "Open-source software",
+            "Artificial intelligence",
+            "Machine learning",
+            "Data structures and algorithms"
+          ]
+        }
+      }
+    </script>
+    <title>Pawan Kumar G</title>
   </head>
   <body>
     <div id="root"></div>

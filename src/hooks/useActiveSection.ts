@@ -10,23 +10,45 @@ export function useActiveSection(ids: string[]) {
 
     if (!elements.length) return
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visible = entries
-          .filter((entry) => entry.isIntersecting)
-          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)
-        if (visible[0]?.target.id) {
-          setActive(visible[0].target.id)
-        }
-      },
-      {
-        rootMargin: '-28% 0px -55% 0px',
-        threshold: [0.1, 0.25, 0.5],
-      },
-    )
+    let frame = 0
 
-    for (const element of elements) observer.observe(element)
-    return () => observer.disconnect()
+    const update = () => {
+      frame = 0
+      const header = document.querySelector('header')
+      const headerBar = header?.firstElementChild
+      const headerHeight = headerBar instanceof HTMLElement ? headerBar.offsetHeight : 72
+      const readingLine =
+        window.scrollY + headerHeight + (window.innerHeight - headerHeight) * 0.28
+      const atBottom =
+        window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4
+      let current = elements[0].id
+
+      if (atBottom) {
+        current = elements[elements.length - 1].id
+      } else {
+        for (const element of elements) {
+          const top = window.scrollY + element.getBoundingClientRect().top
+          if (top > readingLine) break
+          current = element.id
+        }
+      }
+
+      setActive((previous) => (previous === current ? previous : current))
+    }
+
+    const onScroll = () => {
+      if (frame) return
+      frame = window.requestAnimationFrame(update)
+    }
+
+    update()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    window.addEventListener('resize', onScroll)
+    return () => {
+      if (frame) window.cancelAnimationFrame(frame)
+      window.removeEventListener('scroll', onScroll)
+      window.removeEventListener('resize', onScroll)
+    }
   }, [ids])
 
   return active

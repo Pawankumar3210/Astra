@@ -1,7 +1,13 @@
+import { TerminalSquare } from 'lucide-react'
 import { portfolio } from '@/content/portfolio'
+import { NowPanel } from './NowPanel'
 import { SectionHeading } from './SectionHeading'
 
-export function AboutSection() {
+type AboutSectionProps = {
+  onOpenTerminal: () => void
+}
+
+export function AboutSection({ onOpenTerminal }: AboutSectionProps) {
   return (
     <section id="about" className="relative" aria-labelledby="about-heading">
       <div className="section-shell">
@@ -26,47 +32,60 @@ export function AboutSection() {
             </ul>
           </div>
 
-          <aside className="relative isolate overflow-hidden rounded-[1.6rem] border border-[var(--border)] p-8">
-            <div className="orbital-grid absolute inset-0 opacity-70" aria-hidden="true" />
-            <svg
-              viewBox="0 0 240 240"
-              className="relative mx-auto w-full max-w-sm text-[var(--accent)]"
-              aria-hidden="true"
-            >
-              <circle cx="120" cy="120" r="92" fill="none" stroke="currentColor" strokeOpacity="0.18" />
-              <circle cx="120" cy="120" r="58" fill="none" stroke="currentColor" strokeOpacity="0.28" />
-              <ellipse
-                cx="120"
-                cy="120"
-                rx="110"
-                ry="36"
-                fill="none"
-                stroke="currentColor"
-                strokeOpacity="0.35"
-                transform="rotate(-18 120 120)"
-              />
-              <circle cx="214" cy="86" r="4" fill="currentColor" />
-              <circle cx="120" cy="120" r="6" fill="currentColor" />
-            </svg>
-            <p className="relative font-mono text-[0.65rem] uppercase tracking-[0.2em] text-[var(--accent)]">
-              Orbital dossier
-            </p>
-            <dl className="relative mt-4 grid gap-4 font-mono text-xs uppercase tracking-[0.16em] text-[var(--text-soft)]">
-              <div className="flex justify-between gap-4">
-                <dt>Subject</dt>
-                <dd className="text-[var(--text)]">{portfolio.owner.shortName}</dd>
-              </div>
-              <div className="flex justify-between gap-4">
-                <dt>Vector</dt>
-                <dd className="text-[var(--text)]">{portfolio.owner.title}</dd>
-              </div>
-              <div className="flex justify-between gap-4">
-                <dt>Motto</dt>
-                <dd className="text-[var(--accent)]">{portfolio.motto}</dd>
-              </div>
-            </dl>
+          <aside className="terminal-card relative isolate overflow-hidden rounded-[1.6rem] border border-white/10 bg-[#071018] text-[#d7efe4] shadow-[0_24px_70px_rgba(0,0,0,0.35)]">
+            <div className="flex items-center justify-between border-b border-white/10 px-5 py-3.5">
+              <p className="font-mono text-xs tracking-[0.18em] text-[#5dffb1]">ASTRA / DEV</p>
+              <span className="flex items-center gap-1.5 font-mono text-[0.65rem] uppercase tracking-[0.16em] text-[#9ab7a8]">
+                <span className="h-1.5 w-1.5 rounded-full bg-[#5dffb1]" aria-hidden="true" />
+                ready
+              </span>
+            </div>
+
+            <div className="px-5 py-5 font-mono text-[0.8rem] leading-7">
+              <p>
+                <span className="text-[#5dffb1]">visitor@astra:~$</span>{' '}
+                <span className="text-[#f3f7f5]">whoami</span>
+              </p>
+              <p className="text-[#b9d8f8]">
+                {portfolio.owner.name} · {portfolio.owner.title}
+              </p>
+              <p className="mt-3">
+                <span className="text-[#5dffb1]">visitor@astra:~$</span>{' '}
+                <span className="text-[#f3f7f5]">ls missions</span>
+              </p>
+              <p className="flex flex-wrap gap-x-3 text-[#b9d8f8]">
+                {portfolio.projects.map((project) => (
+                  <span key={project.id}>{project.id}</span>
+                ))}
+              </p>
+              <p className="mt-3">
+                <span className="text-[#5dffb1]">visitor@astra:~$</span>{' '}
+                <span className="text-[#f3f7f5]">cat motto</span>
+              </p>
+              <p className="text-[#b9d8f8]">{portfolio.motto}</p>
+              <p className="mt-3">
+                <span className="text-[#5dffb1]">visitor@astra:~$</span>{' '}
+                <span className="terminal-cursor" aria-hidden="true" />
+              </p>
+            </div>
+
+            <div className="border-t border-white/10 px-5 py-4">
+              <button
+                type="button"
+                onClick={onOpenTerminal}
+                aria-keyshortcuts="Control+J Meta+J"
+                className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-[#5dffb1] px-4 font-mono text-sm font-medium text-[#071018] transition-colors hover:bg-[#8affc8] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#5dffb1]"
+              >
+                <TerminalSquare size={16} aria-hidden="true" />
+                Launch terminal
+              </button>
+              <p className="mt-3 text-center font-mono text-[0.65rem] uppercase tracking-[0.14em] text-[#9ab7a8]">
+                or press {portfolio.terminalShortcut}
+              </p>
+            </div>
           </aside>
         </div>
+        <NowPanel />
       </div>
     </section>
   )

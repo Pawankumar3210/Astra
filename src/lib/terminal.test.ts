@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { ALLOWED_COMMANDS, runCommand } from './terminal'
+import { ALLOWED_COMMANDS, AUTOCOMPLETE_COMMANDS, runCommand } from './terminal'
 import { portfolio } from '@/content/portfolio'
 
 describe('developer terminal', () => {
@@ -7,12 +7,22 @@ describe('developer terminal', () => {
     expect(ALLOWED_COMMANDS).toEqual([
       'help',
       'about',
+      'now',
       'projects',
       'skills',
       'contact',
+      'github',
+      'resume',
+      'theme',
+      'motto',
       'clear',
       'exit',
+      'warp',
+      'sudo',
+      'coffee',
+      '42',
     ])
+    expect(AUTOCOMPLETE_COMMANDS).not.toContain('warp')
   })
 
   it('reuses portfolio data for projects and about', () => {
@@ -43,5 +53,35 @@ describe('developer terminal', () => {
   it('supports clear and exit', () => {
     expect(runCommand('clear')).toEqual({ type: 'clear' })
     expect(runCommand('exit')).toEqual({ type: 'exit' })
+  })
+
+  it('reports now data and public links', () => {
+    const now = runCommand('now')
+    const github = runCommand('github')
+    expect(now.type).toBe('output')
+    expect(github.type).toBe('output')
+    if (now.type === 'output') {
+      expect(now.lines.join(' ')).toContain(portfolio.now.updated)
+      for (const item of portfolio.now.items) {
+        expect(now.lines.join(' ')).toContain(item.label)
+      }
+    }
+    if (github.type === 'output') {
+      expect(github.lines.join(' ')).toContain('github.com')
+    }
+  })
+
+  it('emits controlled effects for theme and warp', () => {
+    expect(runCommand('theme')).toMatchObject({
+      type: 'effect',
+      effect: 'theme-toggle',
+    })
+    expect(runCommand('warp')).toMatchObject({
+      type: 'effect',
+      effect: 'warp',
+    })
+    expect(runCommand('sudo').type).toBe('output')
+    expect(runCommand('coffee').type).toBe('output')
+    expect(runCommand('42').type).toBe('output')
   })
 })

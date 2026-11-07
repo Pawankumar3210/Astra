@@ -4,21 +4,37 @@ export type TerminalResult =
   | { type: 'output'; lines: string[] }
   | { type: 'clear' }
   | { type: 'exit' }
+  | { type: 'effect'; effect: 'theme-toggle' | 'warp'; lines: string[] }
 
-const COMMANDS = [
+const PUBLIC_COMMANDS = [
   'help',
   'about',
+  'now',
   'projects',
   'skills',
   'contact',
+  'github',
+  'resume',
+  'theme',
+  'motto',
   'clear',
   'exit',
 ] as const
 
-export const ALLOWED_COMMANDS: readonly string[] = COMMANDS
+const SECRET_COMMANDS = ['warp', 'sudo', 'coffee', '42'] as const
+
+export const AUTOCOMPLETE_COMMANDS: readonly string[] = PUBLIC_COMMANDS
+export const ALLOWED_COMMANDS: readonly string[] = [...PUBLIC_COMMANDS, ...SECRET_COMMANDS]
 
 function wrap(title: string, lines: string[]) {
   return [title, ...lines]
+}
+
+function getContact(data: Portfolio, id: string) {
+  return (
+    publicContact.find((channel) => channel.id === id) ??
+    data.contact.channels.find((channel) => channel.id === id)
+  )
 }
 
 export function runCommand(
@@ -38,9 +54,14 @@ export function runCommand(
         lines: wrap('Available commands', [
           'help       list commands',
           'about      profile introduction',
+          'now        current focus threads',
           'projects   mission archive',
           'skills     technology groups',
           'contact    public contact options',
+          'github     GitHub profile',
+          'resume     résumé location',
+          'theme      toggle light / dark',
+          'motto      mission motto',
           'clear      clear the buffer',
           'exit       close the terminal',
         ]),
@@ -50,8 +71,16 @@ export function runCommand(
         type: 'output',
         lines: wrap(`${data.owner.name} — ${data.owner.title}`, [
           data.owner.summary,
+          data.owner.availability,
           data.motto,
         ]),
+      }
+    case 'now':
+      return {
+        type: 'output',
+        lines: wrap(`Now — updated ${data.now.updated}`, data.now.items.map(
+          (item) => `${item.label}: ${item.detail}`,
+        )),
       }
     case 'projects':
       return {
@@ -92,6 +121,52 @@ export function runCommand(
         ),
       }
     }
+    case 'github': {
+      const github = getContact(data, 'github')
+      return {
+        type: 'output',
+        lines: github
+          ? [`GitHub: ${github.href}`]
+          : ['GitHub profile is not configured yet.'],
+      }
+    }
+    case 'resume':
+      return {
+        type: 'output',
+        lines: wrap('Résumé', [
+          `PDF: ${data.resumeUrl}`,
+          'Use the résumé button in the interface to download the latest copy.',
+        ]),
+      }
+    case 'theme':
+      return {
+        type: 'effect',
+        effect: 'theme-toggle',
+        lines: ['Switching theme preference.'],
+      }
+    case 'motto':
+      return { type: 'output', lines: [data.motto] }
+    case 'warp':
+      return {
+        type: 'effect',
+        effect: 'warp',
+        lines: ['Initiating warp drive. Hold onto your orbit.'],
+      }
+    case 'sudo':
+      return {
+        type: 'output',
+        lines: ['Nice try. ASTRA does not grant orbital root access.'],
+      }
+    case 'coffee':
+      return {
+        type: 'output',
+        lines: ['Coffee module offline. Tea subroutine remains fully operational.'],
+      }
+    case '42':
+      return {
+        type: 'output',
+        lines: ['The answer is confirmed. The question is still in orbit.'],
+      }
     case 'clear':
       return { type: 'clear' }
     case 'exit':
