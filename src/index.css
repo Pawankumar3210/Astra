@@ -2968,6 +2968,12 @@ kbd {
   width: 100vw;
 }
 
+/* Keep the page hidden and inert until the intro finishes */
+.app-shell--intro {
+  visibility: hidden;
+  pointer-events: none;
+}
+
 /* Cinematic intro */
 .app-intro {
   position: fixed;

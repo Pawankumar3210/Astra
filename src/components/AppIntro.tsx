@@ -8,7 +8,11 @@ const PROGRESS_DURATION = 1100
 const HOLD_DURATION = 180
 const EXIT_DURATION = 520
 
-export function AppIntro() {
+type AppIntroProps = {
+  onComplete?: () => void
+}
+
+export function AppIntro({ onComplete }: AppIntroProps) {
   const [reduced] = useState(() =>
     typeof window === 'undefined'
       ? false
@@ -48,6 +52,11 @@ export function AppIntro() {
     const timer = window.setTimeout(() => setPhase('done'), EXIT_DURATION)
     return () => window.clearTimeout(timer)
   }, [phase])
+
+  useEffect(() => {
+    if (phase !== 'done') return
+    onComplete?.()
+  }, [onComplete, phase])
 
   useEffect(() => {
     if (phase === 'done') return

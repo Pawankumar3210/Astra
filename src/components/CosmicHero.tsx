@@ -5,13 +5,13 @@ import { portfolio } from '@/content/portfolio'
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
 import { EarthHorizon } from './EarthHorizon'
 
-function TypewriterMotto({ reduced }: { reduced: boolean }) {
+function TypewriterMotto({ reduced, introReady }: { reduced: boolean; introReady: boolean }) {
   const full = portfolio.motto
   const firstLine = portfolio.mottoLines[0]
   const [visible, setVisible] = useState(0)
 
   useEffect(() => {
-    if (reduced) return
+    if (reduced || !introReady) return
 
     let index = 0
     let timer = 0
@@ -28,14 +28,15 @@ function TypewriterMotto({ reduced }: { reduced: boolean }) {
 
     timer = window.setTimeout(tick, 320)
     return () => window.clearTimeout(timer)
-  }, [firstLine.length, full, reduced])
+  }, [firstLine.length, full, introReady, reduced])
 
-  const shown = reduced ? full.length : visible
+  const shown = reduced ? full.length : introReady ? visible : 0
   const firstVisible = full.slice(0, Math.min(shown, firstLine.length))
   const secondVisible = shown > firstLine.length ? full.slice(firstLine.length + 1, shown) : ''
   const typingFirst = shown < firstLine.length
   const done = shown >= full.length
-  const caret = !reduced && !done ? <span className="typewriter-caret" aria-hidden="true" /> : null
+  const caret =
+    introReady && !reduced && !done ? <span className="typewriter-caret" aria-hidden="true" /> : null
 
   return (
     <span className="block">
@@ -54,7 +55,7 @@ function TypewriterMotto({ reduced }: { reduced: boolean }) {
   )
 }
 
-export function CosmicHero() {
+export function CosmicHero({ introReady = true }: { introReady?: boolean }) {
   const reduced = usePrefersReducedMotion()
 
   const fade = reduced
@@ -84,7 +85,7 @@ export function CosmicHero() {
           }}
         >
           <motion.h1 id="hero-heading" className="heading-xl hero-motto" variants={fade}>
-            <TypewriterMotto reduced={reduced} />
+            <TypewriterMotto reduced={reduced} introReady={introReady} />
           </motion.h1>
           <motion.p className="mt-8 font-display text-2xl text-[var(--text)] sm:text-3xl" variants={fade}>
             {portfolio.owner.greeting}
